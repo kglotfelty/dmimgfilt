@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE cxchelptopics SYSTEM "CXCHelp.dtd">
+<cxchelptopics>
+  <ENTRY context="tools" key="dmimgfilt" 
+	 refkeywords="dm image images filter filtering mean median mode min max noise grain smooth mask 
+		      peak valley variance quantile histogram equalization extreme unsharpen unsharp
+		      clip mode mean median sigma slope gradient" 
+	 seealsogroups="dmimgtools regiontools merging"
+	 displayseealsogroups="">
+
+    <SYNOPSIS>
+      Performs various non-linear image filtering techniques.
+    </SYNOPSIS>
+
+    <DESC>
+      <PARA>
+	`dmimgfilt' performs one of several different mask-based image
+	filtering techniques on the input image.  These different techniques
+	all make use of an input mask and are helpful in reducing noise in
+	the input image. They may also be used to estimate background, or to
+	help define upper and lower limits on the data.
+      </PARA>
+<LIST>
+ <CAPTION>Filter functions</CAPTION>
+  <ITEM> min - the minimum value in the mask region</ITEM>      
+  <ITEM> max - the maximum value in the mask region </ITEM>
+  <ITEM> mean - the average value in the mask region </ITEM>
+  <ITEM> sum - the sum of the values in the mask region </ITEM>
+  <ITEM> count - the sum of pixels in the mask region (lower at edges
+  and near NULL/NaN pixels) </ITEM>
+  <ITEM> median - the median value in the mask region.  The median is
+  the middle value from the array of pixel values.  This is a
+  non-standard median: if the number points is even, then the lower
+  value is used rather than the mean of the two middle values.</ITEM>
+  <ITEM> mode - the mode is defined as the 3 * median - 2 * mean.</ITEM>
+  <ITEM> nmode - the mode is defined as the 3 * median - 2 *
+  mean. nmode is the mode divided-by mean to get a normalized value.</ITEM>
+  <ITEM> sigma - the output image is the standard deviation of the pixels in the mask </ITEM>
+  <ITEM> extreme - if the mean is closer to the min, then the min is
+  used; otherwise, the max is used.</ITEM>
+  <ITEM> locheq - local histogram equalization. The range of pixels in the mask region is stretched to the range of pixels in the whole image.  Useful to extract low-level structure in images.</ITEM>
+   <ITEM> kuwahara - an edge-preserving smoothing filter.  The mask is split into quadrants (NE, NW, SE, SW). The mean and sigma is computed for each quadrant. The mean with the smallest sigma is used.</ITEM>
+   <ITEM> unsharp - the output pixel value is equal to the input pixel minus the mean of the pixel values in the mask.</ITEM>
+   <ITEM> range - the output pixel is equal to the range (MAX - MIN)
+  of the pixel values in the mask</ITEM>
+   <ITEM> mid - the middle value between the min and max == (MAX + MIN)/2.0</ITEM>
+  <ITEM> variance - the output pixel is equal to the sqrt of the sum
+  of the squares of the center-pixel - the pixels in the mask.</ITEM>
+  <ITEM> q25 - the 25% quantile value of the pixels in the mask</ITEM>
+  <ITEM> q33 - the 33% quantile value of the pixels in the mask</ITEM>
+  <ITEM> q67 - the 67% quantile value of the pixels in the mask</ITEM>
+  <ITEM> q75 - the 75% quantile value of the pixels in the mask</ITEM>
+  <ITEM> mcv - the Most Common Value.  A histogram of the values
+  inside the mask is computed and the histogram bin with the largest
+  value is used </ITEM>
+  <ITEM> rclip - If the center pixel value is less than the min pixel
+  in the mask, replace with the min value.  If it is greater than the max,
+  replace with the max.  Otherwise, use original value.</ITEM>
+  <ITEM> peak - if center pixel is greater than all the pixels in the
+  mask, then keep center value; otherwise, output NaN.</ITEM>
+  <ITEM> valley - if center pixel is less than all the pixels in the
+  mask, then keep center value; otherwise, output NaN.</ITEM>
+  <ITEM> olympic - the min and max values are excluded and the average of
+    of the remaining pixels is used.</ITEM>
+  <ITEM> pmean - Poisson mean computed as (#Pixels with value = 0 or 1 divided
+  by #Pixels with value = 0 ) minus 1.  If #pixels_0 is 0 then use
+  median.</ITEM>
+  <ITEM>mu3 - third moment</ITEM>
+  <ITEM>mu4 - fourth moment</ITEM>
+  <ITEM>jitter - randomly select one of the values in the mask</ITEM>
+  <ITEM>rmf - root mean square</ITEM>
+  <ITEM>nslope - minimum slope (difference) between values in mask</ITEM>
+  <ITEM>3sigmean - mean value after doing 5 iterations of 3-sigma clipping</ITEM>
+  <ITEM>3sigmedian - median value after doing 5 iterations of 3-sigma clipping</ITEM>
+</LIST>
+
+<PARA>
+  dmimgfilt respects the NULL or NaN values in the input image; the
+  values are skipped and the mask is effectively reduced.  Similarly,
+  any image subspace (region filter) is respected.  Edges are clipped
+  so that the mask is again reduced in size.
+</PARA>
+
+<PARA>
+ Note:  These filters are NOT energy-preserving.  Users should not
+ expect to conserve flux when applying these filters to their data.
+</PARA>
+
+
+</DESC>
+<QEXAMPLELIST>
+<QEXAMPLE>
+  <SYNTAX>
+    <LINE>% dmimgfilt in.img out.img mean mask="box(0,0,3,3)"</LINE>
+  </SYNTAX>
+  <DESC>
+    <PARA>
+    The pixels in the output image (out.img) are equal to the mean of the pixel 
+    values in a 3x3 box around the input pixels.  (This is essentially
+    convolving the input image with an un-normalized 3x3 box.)     
+    </PARA>
+  </DESC>
+</QEXAMPLE>
+
+<QEXAMPLE>
+  <SYNTAX>
+    <LINE>% dmimgfilt cas_a.fits diffuse.fits median mask="annulus(0,0,3,7)"</LINE>
+   </SYNTAX>
+  <DESC>
+    <PARA>
+    The pixels in the output image are equal to the median of the
+    pixel values in a 4-pixel annulus around the input pixels.  The
+    median (and in particular with an annular mask) is a good
+    technique to estimate the local background. 
+    </PARA>
+  </DESC>
+</QEXAMPLE>
+
+
+<QEXAMPLE>
+  <SYNTAX>
+    <LINE>% dmimgfilt A,B,C,D,...Z mean.fits mean "point(0,0)"</LINE>
+   </SYNTAX>
+  <DESC>
+    <PARA>
+      Average a stack of 26 images.  The output image at pixel(x,y) is
+      equal to the mean values of the pixel(x,y) values from the
+      stack of input images. For another method of
+      averaging images, see <HREF link="http://cxc.harvard.edu/ciao/ahelp/dmimgcalc.html">"ahelp dmimgcalc"</HREF>.
+    </PARA>
+  </DESC>
+</QEXAMPLE>
+
+
+
+</QEXAMPLELIST>
+<PARAMLIST>
+<PARAM filetype="input" name="infile" reqd="yes" stacks="yes" type="file">
+<SYNOPSIS>
+
+	The input image. 
+    
+</SYNOPSIS>
+<DESC>
+<PARA>
+
+  The input 2D image.   A stack of images can be input.  The values
+  that the non-linear algorithm is applied to comes from the mask
+  applied to all the images in the stack. 
+      
+</PARA>
+
+</DESC>
+
+</PARAM>
+<PARAM filetype="output" name="outfile" reqd="yes" type="file">
+<SYNOPSIS>
+
+	The output file name
+    
+</SYNOPSIS>
+<DESC>
+<PARA>
+   The output filtered image.
+</PARA>
+
+</DESC>
+
+</PARAM>
+<PARAM def="median" name="function" reqd="yes" type="string">
+<SYNOPSIS>
+
+  The filter function to use.
+    
+</SYNOPSIS>
+<DESC>
+<PARA>
+
+  The allowed filter fuctions are: min, max, mean, median, mode, sigma, 
+  extreme, locheq, kuwahara, unsharp, range, variance, nmode, q25, q33, q67, q75,  mcv, sum, rclip, peak, valley, count, olympic, pmean, mu3, mu4, jitter, rms, nslope, 3sigmean, and 3sigmedian.
+
+</PARA>
+</DESC>
+
+</PARAM>
+<PARAM name="mask" reqd="yes" type="string">
+<SYNOPSIS>
+  The input mask where the filter function is applied.
+</SYNOPSIS>
+<DESC>
+  <PARA>
+    The region specification of the mask to use when computing the
+    filter function.  CIAO-style region syntax is support.
+  </PARA>
+
+<PARA>
+  The mask parameter controls the aperture of values considered in the 
+'function' statistics.  It takes the form of a region specification (see 
+<HREF link="http://cxc.harvard.edu/ciao/ahelp/dmregions.html">"ahelp
+dmregions"</HREF>).  There are several pre-defined masks included in
+the parameter file.  The units of all regions should be in 
+image pixels; thus "circle(0,0,3)" defines a circle w/ radius=3 pixels
+without any knowledge of the size (e.g. arcsec) of the pixels.  The mask
+is assumed to be centered.  Asymmetrical masks may lead to a shift in the
+output image with respect to the input image.
+</PARA>
+</DESC>
+</PARAM>
+
+<PARAM def="1" min="1" name="numiter" reqd="no" type="integer">
+<SYNOPSIS>
+  Number of iterations
+</SYNOPSIS>
+<DESC>
+  <PARA>
+   The same filter can be applied to the data multiple times.  
+  </PARA>
+  <PARA>
+    When there are more than one files input, the subsequent
+    iterations are done only on the output data as opposed to adding
+    the output data into the stack.
+  </PARA>
+
+</DESC>
+</PARAM>
+
+<PARAM name="lookupTab" reqd="no" type="string">
+<SYNOPSIS>
+  The header merging table
+</SYNOPSIS>
+<DESC>
+  <PARA>
+    Rules to merge the headers when more than one file supplied.
+  </PARA>
+</DESC>
+</PARAM>
+
+<PARAM def="no" name="clobber" type="boolean">
+<SYNOPSIS>
+
+	Remove output if it exists?
+    
+</SYNOPSIS>
+<DESC>
+<PARA>
+
+	Used to specify whether or not to clobber existing file that
+	has the same name as the specified output file
+         
+</PARA>
+
+</DESC>
+
+</PARAM>
+<PARAM def="0" max="5" min="0" name="verbose" type="integer">
+<SYNOPSIS>
+
+	The tool chatter level
+    
+</SYNOPSIS>
+<DESC>
+<PARA>
+
+	Verbose can be from 0 to 5, generating different amounts
+        of debugging output.
+         
+</PARA>
+
+</DESC>
+
+</PARAM>
+</PARAMLIST>
+
+    <BUGS>
+      <PARA>
+	See the
+        <HREF link="http://cxc.harvard.edu/ciao/bugs/dmimgfilt.html">bugs page
+	for this tool</HREF>
+        on the CIAO website for an up-to-date listing of known bugs.
+      </PARA>
+    </BUGS>
+
+    <LASTMODIFIED>December 2013</LASTMODIFIED>
+  </ENTRY>
+</cxchelptopics>

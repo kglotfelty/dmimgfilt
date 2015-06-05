@@ -28,37 +28,37 @@
 #include <dmimgfilt.h>
 
 typedef enum { filtUNKN, filtMIN, filtMAX, filtCOUNT,
-	       filtMEAN, filtMEDIAN, filtMODE, filtSIG,
+               filtMEAN, filtMEDIAN, filtMODE, filtSIG,
                filtEXTREME, filtLOCEQ, filtKUWAHARA,
                filtUNSHARP, filtRANGE, filtVARIANCE,
-	       filtNORM_MODE, filtQUANTILE_25,
-	       filtQUANTILE_33, filtQUANTILE_67,
-	       filtQUANTILE_75, filtQUANTILE_XX,           
+               filtNORM_MODE, filtQUANTILE_25,
+               filtQUANTILE_33, filtQUANTILE_67,
+               filtQUANTILE_75, filtQUANTILE_XX,           
            filtMOST_COMMON,
                filtSUM, filtRCLIP, 
                filtPEAK, filtVALLEY,
                filtRIDGE, filtPLAIN,
                filtOLYMPIC, filtPMEAN, filtMID, filtMU3, filtMU4,
                filtJITTER, filtRMS, filtMIN_SLOPE,
-	       filt3SIGMA_MEDIAN, filt3SIGMA_MEAN
+               filt3SIGMA_MEDIAN, filt3SIGMA_MEAN
 } Method;
 
 int dmimgfilter(void);
 
 short *get_image_mask( dmBlock *inBlock, void *data, dmDataType dt, 
-		       long *lAxes, regRegion *dss, long null, short has_null, 
-		       dmDescriptor *xAxis, dmDescriptor *yAxis );
+                       long *lAxes, regRegion *dss, long null, short has_null, 
+                       dmDescriptor *xAxis, dmDescriptor *yAxis );
 
 
 double get_image_value( void *data, dmDataType dt, 
-			long xx, long yy, long *lAxes, 
-			short *mask );
+                        long xx, long yy, long *lAxes, 
+                        short *mask );
 
 dmDataType get_image_data( dmBlock *inBlock, void **data, long **lAxes,
-			   regRegion **dss, long *nullval, short *nullset );
+                           regRegion **dss, long *nullval, short *nullset );
 
 short  get_image_wcs( dmBlock *imgBlock, dmDescriptor **xAxis, 
-		      dmDescriptor **yAxis );
+                      dmDescriptor **yAxis );
 
 long evaluate_kernel( char *kernel, double **kx, double **ky );
 
@@ -71,8 +71,8 @@ double fill_data( Method mth, double *vals, long nvals ) ;
 
 
 short *get_image_mask( dmBlock *inBlock, void *data, dmDataType dt, 
-		       long *lAxes, regRegion *dss, long null, short has_null, 
-		       dmDescriptor *xAxis, dmDescriptor *yAxis )
+                       long *lAxes, regRegion *dss, long null, short has_null, 
+                       dmDescriptor *xAxis, dmDescriptor *yAxis )
 {
   long npix = lAxes[0] * lAxes[1];
   short *mask;
@@ -89,30 +89,30 @@ short *get_image_mask( dmBlock *inBlock, void *data, dmDataType dt,
       dat = get_image_value( data, dt, xx, yy, lAxes, NULL );
       
       /* Now ... if it is an integer data type, it could possibly have a
-	 null value. Check for that */
+         null value. Check for that */
       if ( ( has_null && ( dat == null ) ) ||
-	   ds_dNAN( dat ) ) {
-	continue;
+           ds_dNAN( dat ) ) {
+        continue;
       }
       
       
       
       /* If the image has a data sub space (aka a region filter applied)
-	 then need to convert coords to physical and check */
+         then need to convert coords to physical and check */
       if ( dss && xAxis ) {
-	double pos[2];
-	double loc[2];
-	pos[0]=xx+1;
-	pos[1]=yy+1;
-	
-	if (yAxis) {  /* If no y axis, then xAxis has 2 components */
-	  dmCoordCalc_d( xAxis, pos, loc );
-	  dmCoordCalc_d( yAxis, pos+1, loc+1 );
-	} else {
-	  dmCoordCalc_d( xAxis, pos, loc );
-	}
-	if ( !regInsideRegion( dss, loc[0], loc[1] ) )
-	  continue;
+        double pos[2];
+        double loc[2];
+        pos[0]=xx+1;
+        pos[1]=yy+1;
+        
+        if (yAxis) {  /* If no y axis, then xAxis has 2 components */
+          dmCoordCalc_d( xAxis, pos, loc );
+          dmCoordCalc_d( yAxis, pos+1, loc+1 );
+        } else {
+          dmCoordCalc_d( xAxis, pos, loc );
+        }
+        if ( !regInsideRegion( dss, loc[0], loc[1] ) )
+          continue;
       }
       
       mask[idx] = 1;
@@ -126,8 +126,8 @@ short *get_image_mask( dmBlock *inBlock, void *data, dmDataType dt,
 
 
 double get_image_value( void *data, dmDataType dt, 
-			long xx, long yy, long *lAxes, 
-			short *mask )
+                        long xx, long yy, long *lAxes, 
+                        short *mask )
 {
 
   long npix = xx + (yy * lAxes[0] );
@@ -199,7 +199,7 @@ double get_image_value( void *data, dmDataType dt,
 
 /* Load the data into memory,  check for DSS, null values */
 dmDataType get_image_data( dmBlock *inBlock, void **data, long **lAxes,
-			   regRegion **dss, long *nullval, short *nullset )
+                           regRegion **dss, long *nullval, short *nullset )
 {
 
   dmDescriptor *imgDesc;
@@ -240,45 +240,45 @@ dmDataType get_image_data( dmBlock *inBlock, void **data, long **lAxes,
       *data = ( void *)calloc( npix, sizeof(char ));
       dmGetArray_ub( imgDesc, (unsigned char*) *data, npix );
       if ( dmDescriptorGetNull_l( imgDesc, nullval) == 0 ) {
-	*nullset=0;
+        *nullset=0;
       } else
-	*nullset=1;
+        *nullset=1;
       break;
       
     case dmSHORT:
       *data = ( void *)calloc( npix, sizeof(short ));
       dmGetArray_s( imgDesc, (short*) *data, npix );
       if ( dmDescriptorGetNull_l( imgDesc, nullval) == 0 ) {
-	*nullset=0;
+        *nullset=0;
       } else
-	*nullset=1;
+        *nullset=1;
       break;
       
     case dmUSHORT:
       *data = ( void *)calloc( npix, sizeof(short ));
       dmGetArray_us( imgDesc, (unsigned short*) *data, npix );
       if ( dmDescriptorGetNull_l( imgDesc, nullval) == 0 ) {
-	*nullset=0;
+        *nullset=0;
       } else
-	*nullset=1;
+        *nullset=1;
       break;
       
     case dmLONG:
       *data = ( void *)calloc( npix, sizeof(long ));
       dmGetArray_l( imgDesc, (long*) *data, npix );
       if ( dmDescriptorGetNull_l( imgDesc, nullval) == 0 ) {
-	*nullset=0;
+        *nullset=0;
       } else
-	*nullset=1;
+        *nullset=1;
       break;
       
     case dmULONG:
       *data = ( void *)calloc( npix, sizeof(long ));
       dmGetArray_ul( imgDesc, (unsigned long*) *data, npix );
       if ( dmDescriptorGetNull_l( imgDesc, nullval) == 0 ) {
-	*nullset=0;
+        *nullset=0;
       } else
-	*nullset=1;
+        *nullset=1;
       break;
       
     case dmFLOAT:
@@ -333,7 +333,7 @@ long evaluate_kernel( char *kernel, double **kx, double **ky )
   dy[1] = ((short)dy[1]);
 
   if ( 0 != regRegionToList(reg, dx[0], dx[1], dy[0], dy[1],
-			    1, kx, ky, &retval )) {
+                            1, kx, ky, &retval )) {
     return(-1);
   }
 
@@ -346,7 +346,7 @@ long evaluate_kernel( char *kernel, double **kx, double **ky )
 
 /* Get the WCS descriptor */
 short  get_image_wcs( dmBlock *imgBlock, dmDescriptor **xAxis, 
-		      dmDescriptor **yAxis )
+                      dmDescriptor **yAxis )
 {
   
 
@@ -576,9 +576,9 @@ int dmimgfilter(void)
     }
     
     if ( dmUNKNOWNTYPE == ( dt[ii] = get_image_data( inBlock, &(data[ii]), &locaxes, 
-						     &dss, &null, &has_null ))) {
+                                                     &dss, &null, &has_null ))) {
       err_msg("ERROR: Cannot get image data or unknown image data-type for "
-	      "file '%s'\n", infile);
+              "file '%s'\n", infile);
       return(-1);
     }
     
@@ -587,8 +587,8 @@ int dmimgfilter(void)
 
 
       if ( NULL == ( outBlock = dmImageCreate( outfile, dmFLOAT,lAxes,2 ))){
-	err_msg("ERROR: Cannot create output image '%s'\n", outfile );
-	return(-1);
+        err_msg("ERROR: Cannot create output image '%s'\n", outfile );
+        return(-1);
       }
       outDesc = dmImageGetDataDescriptor( outBlock );
       dmBlockCopy( inBlock, outBlock, "HEADER");
@@ -598,9 +598,9 @@ int dmimgfilter(void)
     } else {
       /* check */
       if ( ( locaxes[0] != lAxes[0] ) ||
-	   ( locaxes[1] != lAxes[1] )    ) {
-	err_msg("ERROR: All images must be the same size\n");
-	return(-1);
+           ( locaxes[1] != lAxes[1] )    ) {
+        err_msg("ERROR: All images must be the same size\n");
+        return(-1);
       }
     }
     
@@ -610,8 +610,8 @@ int dmimgfilter(void)
     }
     
     if ( NULL == ( nullmask[ii] = get_image_mask( inBlock, data[ii], dt[ii], 
-						  lAxes, dss, null, has_null, 
-						  xdesc, ydesc ))){
+                                                  lAxes, dss, null, has_null, 
+                                                  xdesc, ydesc ))){
       
     }
     hdr[ii] = getHdr( inBlock, hdrDM_FILE);
@@ -686,9 +686,9 @@ int dmimgfilter(void)
   if ( filtPMEAN == mth  ) {
     for (ii=0;ii<nfiles;ii++) {
       if (( dt[ii] == dmFLOAT ) || (dt[ii] == dmDOUBLE)) {
-	err_msg("WARNING: File #%ld is real valued but 'pmean'"
-		" method only useful for integer values, data"
-		" will be cast to integer\n", ii );
+        err_msg("WARNING: File #%ld is real valued but 'pmean'"
+                " method only useful for integer values, data"
+                " will be cast to integer\n", ii );
       }
     }
   }
@@ -736,87 +736,103 @@ int dmimgfilter(void)
     
     if ( verbose>2) {
       fprintf( stderr, "Processing %4.1f%% complete\r",
-	       ((lAxes[1]-yy)/(0.01*lAxes[1])) );
+               ((lAxes[1]-yy)/(0.01*lAxes[1])) );
     }
 
 
     for (xx=lAxes[0];xx--;) {
-      long pix;      
+      //long pix;      
 
       nvals = 0;
-      pix = 0;
+      //pix = 0;
       kuw_num[0]=0; kuw_num[1] =0;kuw_num[2]=0;kuw_num[3]=0;
 
       /* Now loop over the number of files */
       for (ii=nfiles;ii--; ) {
-	centerval = get_image_value( data[ii], dt[ii], xx, yy, 
-				     lAxes, nullmask[ii] );
-	if ( ds_dNAN( centerval ) ) {
-	  continue;
-	}
+        centerval = get_image_value( data[ii], dt[ii], xx, yy, 
+                                     lAxes, nullmask[ii] );
+        if ( ds_dNAN( centerval ) ) {
+          continue;
+        }
 
-	pix=nkvals; /* Same game as w/ the output pixel */
-	pix--;
+        //pix=nkvals; /* Same game as w/ the output pixel */
+        //pix--;
 
-	/* These are looping over the pixels in the kernel */
+        /* These are looping over the pixels in the kernel */
 
-	for (kk=nkvals;kk--;) {
-	  double dater;
-	  long ay;
-	  long ax;
+        for (kk=nkvals;kk--;) {
+          double dater;
+          long ay;
+          long ax;
 
-	  ax=xx+kx[kk];
-	  ay=yy+ky[kk];
-	  
-	  if ( (ax<0) || (ax >= lAxes[0])) {
-	    pix--;
-	    continue;
-	  }
-	  if ( (ay<0) || (ay >= lAxes[1])) {
-	    pix--;
-	    continue;
-	  }
-	  /* If the kernel pixel is non-zero then add more data to
-	     the array */
-	  dater = get_image_value( data[ii], dt[ii], ax, ay, lAxes, 
-				   nullmask[ii] );
-	  if ( ds_dNAN(dater) ) {
-	    pix--;
-	    continue;
-	  }
-	  
-	  if ( mth == filtKUWAHARA ) {
-	    long qx, qy;
-	    qx = kx[kk];
-	    qy = ky[kk];
-	    
-	    /* Figure out which quadrant we're in */
-	    if ( ( qx >= 0 ) && ( qy >= 0 ) )
-	      kuw_vals[0][ kuw_num[0]++] = dater;
-	    if ( ( qx <= 0 ) && ( qy >= 0 ) )
-	      kuw_vals[1][ kuw_num[1]++] = dater;
-	    if ( ( qx <= 0 ) && ( qy <= 0 ) )
-	      kuw_vals[2][ kuw_num[2]++] = dater;
-	    if ( ( qx >= 0 ) && ( qy <= 0 ) )
-	      kuw_vals[3][ kuw_num[3]++] = dater;
-	    
-	  } 
-	  vals[nvals] = dater;
-	  nvals++;
-	  pix--;
-	  
-	} /* end for kk */
+          ax=xx+kx[kk];
+          ay=yy+ky[kk];
 
-	
+          
+
+          
+          if ( (ax<0) || (ax >= lAxes[0])) {
+            //pix--;
+            continue;
+          }
+
+          if ( (ay<0) || (ay >= lAxes[1])) {
+            //pix--;
+            continue;
+          }
+          /* If the kernel pixel is non-zero then add more data to
+             the array */
+          dater = get_image_value( data[ii], dt[ii], ax, ay, lAxes, 
+                                   nullmask[ii] );
+          if ( ds_dNAN(dater) ) {
+            //pix--;
+            continue;
+          }
+
+          
+          if ( mth == filtKUWAHARA ) {
+            long qx, qy;
+            qx = kx[kk];
+            qy = ky[kk];
+            
+            /* Figure out which quadrant we're in */
+            if ( ( qx >= 0 ) && ( qy >= 0 ) )
+              kuw_vals[0][ kuw_num[0]++] = dater;
+            if ( ( qx <= 0 ) && ( qy >= 0 ) )
+              kuw_vals[1][ kuw_num[1]++] = dater;
+            if ( ( qx <= 0 ) && ( qy <= 0 ) )
+              kuw_vals[2][ kuw_num[2]++] = dater;
+            if ( ( qx >= 0 ) && ( qy <= 0 ) )
+              kuw_vals[3][ kuw_num[3]++] = dater;
+            
+          } 
+          vals[nvals] = dater;
+          nvals++;
+          //pix--;
+
+          
+        } /* end for kk */
+
+        
       } /* end loop over files, ii */
 
       
       if ( nvals == 0 ) {
-	double nanval;
-	ds_MAKE_DNAN(nanval);
-	outdata[outpix] = nanval;
+        double nanval;
+        ds_MAKE_DNAN(nanval);
+        outdata[outpix] = nanval;
       } else {
-	outdata[outpix] = nonlinear( vals, nvals ); /* 'nonlinear' is function pointer */
+
+/*
+          if (( xx==40) &&(yy==40)) {
+            printf(" nvals=%d\n",  nvals);                  
+          }
+
+          if (( xx==60) &&(yy==60)) {
+            printf(" nvals=%d\n",  nvals);                  
+          }
+*/
+        outdata[outpix] = nonlinear( vals, nvals ); /* 'nonlinear' is function pointer */
       }
       outpix--;
       

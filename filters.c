@@ -405,15 +405,15 @@ double _filtKUWAHARA(double *vals, long nvals ) {
     
     jj = 0;
     retval = sig[0];
-    if (( sig[1] < retval ) && ((sig[1]-retval)>2*DBL_EPSILON*retval) ) {
+    if (( sig[1] < retval ) ) {
       jj = 1; 
       retval=sig[1]; 
     }
-    if (( sig[2] < retval ) && ((sig[2]-retval)>2*DBL_EPSILON*retval) ) {
+    if (( sig[2] < retval ) ) {
       jj = 2; 
       retval=sig[2]; 
     }
-    if (( sig[3] < retval ) && ((sig[3]-retval)>2*DBL_EPSILON*retval) ) {
+    if (( sig[3] < retval ) ) {
       jj = 3; 
       retval=sig[3]; 
     }
@@ -424,6 +424,7 @@ double _filtKUWAHARA(double *vals, long nvals ) {
   }
   return(retval);
 }
+
 
 double _filtUNSHARP(double *vals, long nvals ) {
   double retval;
@@ -605,8 +606,8 @@ double _filtMOST_COMMON(double *vals, long nvals ) {
     retval = 0;
     for (ii=num_hist_bins;ii--; ) {
       if ( histogram[ii] > max ) {
-	max = histogram[ii];
-	retval = ii;
+        max = histogram[ii];
+        retval = ii;
       }
     }
     /*     printf("num_hist_bin=%d\tretval=%f\n", num_hist_bins, retval); */
@@ -924,8 +925,8 @@ double _filt3SIGMA_MEAN(double *vals, long nvals ) {
     nclip = 0;
     for (ii=nvals; ii--; ) {
       if ( fabs( vals[ii] - mean ) < sigm ) {
-	clip_vals[nclip] = vals[ii];
-	nclip++;
+        clip_vals[nclip] = vals[ii];
+        nclip++;
       }
     }
 
@@ -970,8 +971,8 @@ double _filt3SIGMA_MEDIAN(double *vals, long nvals ) {
     nclip = 0;
     for (ii=nvals; ii--; ) {
       if ( fabs( vals[ii] - mean ) < sigm ) {
-	clip_vals[nclip] = vals[ii];
-	nclip++;
+        clip_vals[nclip] = vals[ii];
+        nclip++;
       }
     }
 

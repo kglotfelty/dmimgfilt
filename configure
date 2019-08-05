@@ -5898,7 +5898,7 @@ fi
 ac_config_files="$ac_config_files Makefile src/Makefile wrapper/Makefile test/Makefile"
 
 
-ac_config_files="$ac_config_files wrapper/mytool:wrapper/wrapper.sh"
+ac_config_files="$ac_config_files wrapper/dmimgfilt:wrapper/wrapper.sh"
 
 
 # -- Go! -----------
@@ -6564,7 +6564,7 @@ do
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "wrapper/Makefile") CONFIG_FILES="$CONFIG_FILES wrapper/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
-    "wrapper/mytool") CONFIG_FILES="$CONFIG_FILES wrapper/mytool:wrapper/wrapper.sh" ;;
+    "wrapper/dmimgfilt") CONFIG_FILES="$CONFIG_FILES wrapper/dmimgfilt:wrapper/wrapper.sh" ;;
 
   *) { { $as_echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 $as_echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -7178,7 +7178,7 @@ $as_echo "$as_me: error: cannot create directory $as_dir" >&2;}
   done
 }
  ;;
-    "wrapper/mytool":F) chmod +x wrapper/mytool ;;
+    "wrapper/dmimgfilt":F) chmod +x wrapper/dmimgfilt ;;
 
   esac
 done # for ac_tag

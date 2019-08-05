@@ -6,7 +6,7 @@ ahelpdir = $(prefix)/share/doc/xml
 
 binexe_PROGRAMS = $(tool)
 
-dmimgfilt_SOURCES = dmimgfilt.c
+dmimgfilt_SOURCES = dmimgfilt.c t_dmimgfilt.c
 dmimgfilt_CPPFLAGS = $(CIAO_CFLAGS)
 dmimgfilt_LDADD = $(CIAO_LIBS) -ldmimgio -ldmfilters
 dmimgfilt_LINK = $(CXX) -o $@ -Wl,-rpath,$(prefix)/lib -Wl,-rpath,$(prefix)/ots/lib 

@@ -51,7 +51,8 @@ am__EXEEXT_1 = dmimgfilt$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(binexedir)" "$(DESTDIR)$(ahelpdir)" \
 	"$(DESTDIR)$(paramdir)"
 PROGRAMS = $(binexe_PROGRAMS)
-am_dmimgfilt_OBJECTS = dmimgfilt-dmimgfilt.$(OBJEXT)
+am_dmimgfilt_OBJECTS = dmimgfilt-dmimgfilt.$(OBJEXT) \
+	dmimgfilt-t_dmimgfilt.$(OBJEXT)
 dmimgfilt_OBJECTS = $(am_dmimgfilt_OBJECTS)
 am__DEPENDENCIES_1 =
 dmimgfilt_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -187,7 +188,7 @@ tool = dmimgfilt
 binexedir = $(prefix)/binexe
 paramdir = $(prefix)/param
 ahelpdir = $(prefix)/share/doc/xml
-dmimgfilt_SOURCES = dmimgfilt.c
+dmimgfilt_SOURCES = dmimgfilt.c t_dmimgfilt.c
 dmimgfilt_CPPFLAGS = $(CIAO_CFLAGS)
 dmimgfilt_LDADD = $(CIAO_LIBS) -ldmimgio -ldmfilters $(am__append_1)
 dmimgfilt_LINK = $(CXX) -o $@ -Wl,-rpath,$(prefix)/lib -Wl,-rpath,$(prefix)/ots/lib 
@@ -275,6 +276,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmimgfilt-dmimgfilt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dmimgfilt-t_dmimgfilt.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -303,6 +305,20 @@ dmimgfilt-dmimgfilt.obj: dmimgfilt.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='dmimgfilt.c' object='dmimgfilt-dmimgfilt.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmimgfilt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmimgfilt-dmimgfilt.obj `if test -f 'dmimgfilt.c'; then $(CYGPATH_W) 'dmimgfilt.c'; else $(CYGPATH_W) '$(srcdir)/dmimgfilt.c'; fi`
+
+dmimgfilt-t_dmimgfilt.o: t_dmimgfilt.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmimgfilt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dmimgfilt-t_dmimgfilt.o -MD -MP -MF $(DEPDIR)/dmimgfilt-t_dmimgfilt.Tpo -c -o dmimgfilt-t_dmimgfilt.o `test -f 't_dmimgfilt.c' || echo '$(srcdir)/'`t_dmimgfilt.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/dmimgfilt-t_dmimgfilt.Tpo $(DEPDIR)/dmimgfilt-t_dmimgfilt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='t_dmimgfilt.c' object='dmimgfilt-t_dmimgfilt.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmimgfilt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmimgfilt-t_dmimgfilt.o `test -f 't_dmimgfilt.c' || echo '$(srcdir)/'`t_dmimgfilt.c
+
+dmimgfilt-t_dmimgfilt.obj: t_dmimgfilt.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmimgfilt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dmimgfilt-t_dmimgfilt.obj -MD -MP -MF $(DEPDIR)/dmimgfilt-t_dmimgfilt.Tpo -c -o dmimgfilt-t_dmimgfilt.obj `if test -f 't_dmimgfilt.c'; then $(CYGPATH_W) 't_dmimgfilt.c'; else $(CYGPATH_W) '$(srcdir)/t_dmimgfilt.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/dmimgfilt-t_dmimgfilt.Tpo $(DEPDIR)/dmimgfilt-t_dmimgfilt.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='t_dmimgfilt.c' object='dmimgfilt-t_dmimgfilt.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dmimgfilt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dmimgfilt-t_dmimgfilt.obj `if test -f 't_dmimgfilt.c'; then $(CYGPATH_W) 't_dmimgfilt.c'; else $(CYGPATH_W) '$(srcdir)/t_dmimgfilt.c'; fi`
 install-dist_ahelpDATA: $(dist_ahelp_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(ahelpdir)" || $(MKDIR_P) "$(DESTDIR)$(ahelpdir)"

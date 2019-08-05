@@ -97,7 +97,7 @@ AC_CONFIG_FILES([
   test/Makefile
 ])
 
-AC_CONFIG_FILES([wrapper/mytool:wrapper/wrapper.sh],[chmod +x wrapper/mytool])
+AC_CONFIG_FILES([wrapper/dmimgfilt:wrapper/wrapper.sh],[chmod +x wrapper/dmimgfilt])
 
 # -- Go! -----------
 

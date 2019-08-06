@@ -1,2 +1,2 @@
-test/indata/* filter=lfs diff=lfs merge=lfs -text
-test/save_data/* filter=lfs diff=lfs merge=lfs -text
+test/indata/dmimgfilt/* filter=lfs diff=lfs merge=lfs -text
+test/save_data/dmimgfilt/* filter=lfs diff=lfs merge=lfs -text

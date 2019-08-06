@@ -315,10 +315,23 @@ long evaluate_kernel( char *kernel, double **kx, double **ky )
   double fy[2] = { -FLT_MAX, FLT_MAX };
   
   long retval=0;
+  char errStr[ dmMAXSTR + 1]= "" ;
 
   if ( NULL == (reg=dmRegParse( kernel ))) {
-    err_msg("ERROR: problems parsing region string '%s'\n", kernel );
+    dmGetErrorMessage( errStr, dmMAXSTR );
+    err_msg("ERROR: %s.\n", errStr);
     return(-1);
+  }
+
+  else{
+    /*Parsed kernel will be in Physical coordinates but image is in Logical 
+    * coordinates and not currently compatible. Remove this when a region 
+    * library method is created to set coordinate system. 
+    */
+    if ( NULL != ( strstr( kernel, "mask" ))){
+      err_msg("ERROR: mask syntax, '%s', not compatible with dmimgfilt.  ", kernel);
+      return(-1);
+    }
   }
 
   regExtent( reg, fx, fy, dx, dy );
@@ -514,6 +527,7 @@ int dmimgfilter(void)
   
   dmBlock *outBlock = NULL;
   dmDescriptor *outDesc = NULL;
+  dmDescriptor *inDesc = NULL;
 
   long nkpix;
   double *kx, *ky;
@@ -534,6 +548,8 @@ int dmimgfilter(void)
   double (*nonlinear)( double *vals, long nvals ) = NULL;
   long niter;
 
+  char unit[DS_SZ_KEYWORD];
+  memset( &unit[0], 0, DS_SZ_KEYWORD) ;
 
   /* Get the parameters */
   clgetstr( "infile", infile, DS_SZ_PATHNAME );
@@ -565,6 +581,20 @@ int dmimgfilter(void)
     return(-1);
   }
 
+  if ( -1 == ( nkpix = evaluate_kernel( mask, &kx, &ky ) ) ) {
+    err_msg("ERROR: cannot parse mask function '%s'\n", mask );
+    return(-1);
+  }
+
+  if ( 0 == nkpix ) {
+    err_msg("ERROR: mask has no pixels in it\n");
+    return(-1);
+  }
+
+  if ( filtUNKN == ( mth = get_method( func ) ) ) {
+    err_msg("ERROR: function '%s' is not supported\n", func );
+    return(-1);
+  }
 
   stk_rewind(instack);
   while ( NULL != (stkfile=stk_read_next(instack)) ) {
@@ -591,6 +621,8 @@ int dmimgfilter(void)
         return(-1);
       }
       outDesc = dmImageGetDataDescriptor( outBlock );
+      inDesc = dmImageGetDataDescriptor( inBlock);
+      dmGetUnit( inDesc, unit, DS_SZ_KEYWORD );
       dmBlockCopy( inBlock, outBlock, "HEADER");
       ds_copy_full_header( inBlock, outBlock, "dmimgfilt", 0 );
       dmBlockCopyWCS( inBlock, outBlock);
@@ -620,23 +652,7 @@ int dmimgfilter(void)
   } /* end while loop over stack */
 
 
-  if ( -1 == ( nkpix = evaluate_kernel( mask, &kx, &ky ) ) ) {
-    err_msg("ERROR: cannot parse mask function '%s'\n", mask );
-    return(-1);
-  }
-
-  if ( 0 == nkpix ) {
-    err_msg("ERROR: mask has no pixels in it\n");
-    return(-1);
-  }
-
-
-  if ( filtUNKN == ( mth = get_method( func ) ) ) {
-    err_msg("ERROR: function '%s' is not supported\n", func );
-    return(-1);
-  }
-
-
+  
   /* Use function points so that we don't have to go through the switch
      statement for every pixel, also makes adding new f() easier.*/
   switch( mth ) {
@@ -870,6 +886,7 @@ int dmimgfilter(void)
   }
   put_param_hist_info( outBlock, "dmimgfilt", NULL, 0 );
 
+  dmSetUnit( outDesc, unit );
 
   dmSetArray_d( outDesc, outdata, (lAxes[0]*lAxes[1]));
   dmImageClose(outBlock );

@@ -40,60 +40,6 @@ error_exit()
 }
 
 ######################################################################
-# subroutine
-# keyfilter infile outfile
-# filters out CHECKSUM, Dataset, CREATOR, HISTORY, DATASUM, 
-#             ASCDSVER, HISTNUM, and DATE
-# To filter additional keywords, add s/KEYWORD/Dataset/g; for each.
-
-keyfilter()
-{
-  cat $1 | sed -e 's/CHECKSUM/Dataset/g;s/COMMENT/Dataset/g;
-  s/DATE/Dataset/g;s/CREATOR/Dataset/g;s/HISTORY/Dataset/g;
-  s/DATASUM/Dataset/g;s/ASCDSVER/Dataset/g;s/HISTNUM/Dataset/g' | \
-  grep -v Dataset > $2
-  zerotest $2
-}
-
-######################################################################
-# subroutine
-# find_tool <toolname>
-# checks that tool exists and is runnable
-
-find_tool()
-{
-  s1=`type $1`
-  s2=`echo $s1 | awk -F" " '{ print $3}'`
-  if test -x $s2 ; then
-    :
-  else
-    error_exit "tool $1 not found"
-  fi
-}
-
-######################################################################
-# subroutine
-# zerotest <file> 
-# Makes sure that file is not 0 length.
-# Use this to protect yourself against empty files  (which will 
-# 'diff' without error).  This can happen when the input file to
-# cat $infile | do_something >> $outfile
-# is missing.  This is used by keyfilter(), above.
-
-zerotest()
-{
- if test -s $1 ;
- then
-   :
- else
-   echo "ERROR: file $1 is of zero length" >> $LOGFILE
-   #  Indicate failure, but do not exit.
-   mismatch=0
- fi
-}
-
-
-######################################################################
 # Initialization
 
 # !!3
@@ -101,7 +47,7 @@ toolname="dmimgfilt"
 
 # set up list of tests
 # !!4
-alltests="test_min test_max test_mean test_median test_mode test_sigma test_extreme test_locheq test_kuwahara test_unsharp  min_calcgti"
+alltests="test_min test_max test_mean test_median test_mode test_sigma test_extreme test_locheq test_kuwahara test_unsharp  min_calcgti test_mask_empty test_mask_path"
 
 # "short" test to run
 # !!5
@@ -110,6 +56,12 @@ shortlist="$alltests"
 
 # compute date string for log file
 DT=`date +'%d%b%Y_%T'`
+
+# check for directory environment variables
+if test "x${TESTIN}" = "x" -o "x${TESTOUT}" = "x" -o "x${TESTSAV}" = "x" \
+   -o "x${TESTLOG}" = "x" ; then
+  error_exit "one or more of TESTIN/TESTOUT/TESTSAV/TESTLOG not defined" 
+fi
 
 
 # convenience definitions
@@ -123,8 +75,6 @@ LOGFILE=$LOGDIR/${toolname}_log.$DT
 
 #get rid of old logs
 rm -f $LOGDIR/${toolname}_log.*
-
-
 
 # Any tests specified on command line?
 if test $# -gt 0; then
@@ -163,24 +113,6 @@ else
   fi
 fi
 
-# check for directory environment variables
-if test "x${TESTIN}" = "x" -o "x${TESTOUT}" = "x" -o "x${TESTSAV}" = "x" \
-   -o "x${TESTLOG}" = "x" ; then
-  error_exit "one or more of TESTIN/TESTOUT/TESTSAV/TESTLOG not defined" 
-fi
-
-
-# check for tools
-# if a utility is used in the form "utility <args> > outfile", and 'utility'
-# cannot be run, 'outfile' will still be created.  If utility is used on 
-# both the output and reference files of a tool the resultant utility output 
-# files will both exist and be empty, and will pass a diff.
-
-find_tool dmlist
-find_tool dmimgcalc
-
-
-
 # announce ourselves
 echo ""
 echo "${toolname} regression" | tee $LOGFILE
@@ -207,7 +139,11 @@ do
   rm -f $OUTDIR/${testid}*
 
   # Set up file names
-  outfile=$OUTDIR/${testid}.fits"[IMAGE]"
+  if [ ${testid} = "test_mask_empty" ] || [ ${testid} = "test_mask_path" ] ; then
+    outfile=$OUTDIR/${testid}.fits
+  else
+    outfile=$OUTDIR/${testid}.fits"[IMAGE]"
+  fi
   savfile=$SAVDIR/${testid}.fits
 
   echo "running $testid" >> $LOGFILE
@@ -249,12 +185,26 @@ do
     test_unsharp ) test1_string="dmimgfilt infile=$INDIR/img.fits outfile="${outfile}" func=unsharp mask='box(0,0,5,5,45)' clob+ lookupTab=${lkTab1}"
             ;;
 
+    ##SAT-39: Test to catch error for new dmRegParse error handling from SL-17
+    #Test with empty mask string. Should fail
+    test_mask_empty ) test1_string="dmimgfilt infile=$INDIR/img.fits outfile="${outfile}" func=min mask='mask()' clob+ lookupTab=${lkTab1}"
+            ;;
+    #Test with mask(path/to/mask/file). Should fail for now, until region library method created to set coordinate system outside of region library
+    test_mask_path ) test1_string="dmimgfilt infile=$INDIR/img.fits outfile="${outfile}" func=min mask='mask($INDIR/img_mask.fits)' clob+ lookupTab=${lkTab1}"
+            ;;
 
 
   esac
-
-  echo $test1_string | tee -a  $LOGFILE 
-  eval $test1_string  | tee -a  $LOGFILE  2>&1
+  if [ ${testid} = "test_mask_empty" ] || [ ${testid} = "test_mask_path" ]; then
+      echo $test1_string | tee -a  $LOGFILE
+      eval $test1_string
+      mystatus=$?
+      echo " -- status of call was $mystatus"  >>  $LOGFILE
+      echo " -- status of call was $mystatus"  > ${outfile}.status
+  else
+    echo $test1_string | tee -a  $LOGFILE 
+    eval $test1_string  | tee -a  $LOGFILE  2>&1
+  fi
  
 
 
@@ -268,72 +218,23 @@ do
   #  case ${testid} in...  here
 
   ####################################################################
-  # FITS table    (duplicate for as many tables per test as needed)
-
-  # new output
-  # !!10
-#dmlist "${outfile}" header,data,array > $OUTDIR/${testid}.dmp1  2>>$LOGFILE
-#keyfilter $OUTDIR/${testid}.dmp1 $OUTDIR/${testid}.dmp2  2>>$LOGFILE
-
-  # reference output
-  # !!11
-#dmlist $savfile header,data,array > $OUTDIR/${testid}.dmp1_std  2>>$LOGFILE
-#keyfilter $OUTDIR/${testid}.dmp1_std $OUTDIR/${testid}.dmp2_std \
-#          2>>$LOGFILE
-
-  # compare
-  # !!12
-#diff $OUTDIR/${testid}.dmp2 $OUTDIR/${testid}.dmp2_std > \
-#     /dev/null 2>>$LOGFILE
-
-
-#dmdiff "${outfile}" $savfile tol=$SAVDIR/tolerance > /dev/null 2>>$LOGFILE
-#if  test $? -ne 0 ; then
-#  echo "ERROR: MISMATCH in "${outfile}"" >> $LOGFILE
-#  mismatch=0
-#fi
-
-
-  ####################################################################
-  # FITS image  (duplicate for as many images per test as needed)
-
-  # check image
-  # !!13
-#   dmimgcalc ""${outfile}"[1]" "$savfile[1]" none tst verbose=0   2>>$LOGFILE
-#   if test $? -ne 0; then
-#     echo "ERROR: DATA MISMATCH in "${outfile}"" >> $LOGFILE
-#     mismatch=0
-#   fi
-
-  #  Check the header of the image
-
-  # !!14
-  # dmlist "${outfile}" header > $OUTDIR/${testid}.dmp1  2>>$LOGFILE
-  # keyfilter $OUTDIR/${testid}.dmp1 $OUTDIR/${testid}.dmp2  2>>$LOGFILE
-
-  # !!15
-  # dmlist $savfile header > $OUTDIR/${testid}.dmp1_std  2>>$LOGFILE
-  # keyfilter $OUTDIR/${testid}.dmp1_std $OUTDIR/${testid}.dmp2_std \
-  #            2>>$LOGFILE
-
   # compare
   # !!16
+  if [ ${testid} = "test_mask_empty" ] || [ ${testid} = "test_mask_path" ]; then 
+     # this test checks for expected errors so diff the exit status of run
+     diff $outfile.status $savfile.status  > /dev/null 2>>$LOGFILE
+     if  test $? -ne 0 ; then
+       echo "ERROR: MISMATCH in $outfile.status" >> $LOGFILE
+       mismatch=0
+     fi
+  else
    dmdiff "${outfile}" $savfile tol=$SAVDIR/tolerance verb=0 > \
          /dev/null 2>>$LOGFILE
    if  test $? -ne 0 ; then
      echo "ERROR: HEADER MISMATCH in ${outfile}" >> $LOGFILE
      mismatch=0
    fi
-
-  ######################################################################
-  # ascii files
-  # !!17
-  # diff $OUTDIR/${testid}.txt $OUTDIR/${testid}.txt_std > \
-  #       /dev/null 2>>$LOGFILE
-  # if  test $? -ne 0 ; then
-  #   echo "ERROR: TEXT MISMATCH in $OUTDIR/${testid}.txt" >> $LOGFILE
-  #   mismatch=0
-  # fi
+  fi
 
   ####################################################################
   # Did we get an error?

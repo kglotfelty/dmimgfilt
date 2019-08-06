@@ -27,21 +27,21 @@
 #include <cxcregion.h>
 #include <dmimgfilt.h>
 
-typedef enum { filtUNKN, filtMIN, filtMAX, filtCOUNT,
-               filtMEAN, filtMEDIAN, filtMODE, filtSIG,
-               filtEXTREME, filtLOCEQ, filtKUWAHARA,
-               filtUNSHARP, filtRANGE, filtVARIANCE,
-               filtNORM_MODE, filtQUANTILE_25,
-               filtQUANTILE_33, filtQUANTILE_67,
-               filtQUANTILE_75, filtQUANTILE_XX,           
-           filtMOST_COMMON,
-               filtSUM, filtRCLIP, 
-               filtPEAK, filtVALLEY,
-               filtRIDGE, filtPLAIN,
-               filtOLYMPIC, filtPMEAN, filtMID, filtMU3, filtMU4,
-               filtJITTER, filtRMS, filtMIN_SLOPE,
-               filt3SIGMA_MEDIAN, filt3SIGMA_MEAN
-} Method;
+//~ typedef enum { filtUNKN, filtMIN, filtMAX, filtCOUNT,
+               //~ filtMEAN, filtMEDIAN, filtMODE, filtSIG,
+               //~ filtEXTREME, filtLOCEQ, filtKUWAHARA,
+               //~ filtUNSHARP, filtRANGE, filtVARIANCE,
+               //~ filtNORM_MODE, filtQUANTILE_25,
+               //~ filtQUANTILE_33, filtQUANTILE_67,
+               //~ filtQUANTILE_75, filtQUANTILE_XX,           
+           //~ filtMOST_COMMON,
+               //~ filtSUM, filtRCLIP, 
+               //~ filtPEAK, filtVALLEY,
+               //~ filtRIDGE, filtPLAIN,
+               //~ filtOLYMPIC, filtPMEAN, filtMID, filtMU3, filtMU4,
+               //~ filtJITTER, filtRMS, filtMIN_SLOPE,
+               //~ filt3SIGMA_MEDIAN, filt3SIGMA_MEAN
+//~ } Method;
 
 int dmimgfilter(void);
 
@@ -61,12 +61,6 @@ short  get_image_wcs( dmBlock *imgBlock, dmDescriptor **xAxis,
                       dmDescriptor **yAxis );
 
 long evaluate_kernel( char *kernel, double **kx, double **ky );
-
-Method get_method( char *func ) ;
-
-
-double fill_data( Method mth, double *vals, long nvals ) ;
-
 
 
 
@@ -411,90 +405,6 @@ short  get_image_wcs( dmBlock *imgBlock, dmDescriptor **xAxis,
 
 }
 
-Method get_method( char *func ) 
-{
-  Method retval;
-  
-  if ( !strcmp( func, "min" ) ) {
-    retval = filtMIN; 
-  } else if ( !strcmp( func, "max" ) ) {
-    retval = filtMAX; 
-  } else if ( !strcmp( func, "mean" ) ) {
-    retval = filtMEAN; 
-  } else if ( !strcmp( func, "sum" ) ) {
-    retval = filtSUM;
-  } else if ( !strcmp( func, "median" ) ) {
-    retval = filtMEDIAN; 
-  } else if ( !strcmp( func, "mode" ) ) {
-    retval = filtMODE; 
-  } else if ( !strcmp( func, "count" ) ) {
-    retval = filtCOUNT;
-  } else if ( !strcmp( func, "sigma" ) ) {
-    retval = filtSIG; 
-  } else if ( !strcmp( func, "extreme" ) ) {
-    retval = filtEXTREME; 
-  } else if ( !strcmp( func, "locheq" ) ) {
-    retval = filtLOCEQ; 
-  } else if ( !strcmp( func, "kuwahara" ) ) {
-    retval = filtKUWAHARA; 
-  } else if ( !strcmp( func, "unsharp" ) ) {
-    retval = filtUNSHARP; 
-  } else if ( !strcmp( func, "range" ) ) {
-    retval = filtRANGE; 
-  } else if ( !strcmp( func, "variance" ) ) {
-    retval = filtVARIANCE; 
-  } else if ( !strcmp( func, "nmode" ) ) {
-    retval = filtNORM_MODE; 
-  } else if ( !strcmp( func, "q25" ) ) {
-    retval = filtQUANTILE_25; 
-  } else if ( !strcmp( func, "q33" ) ) {
-    retval = filtQUANTILE_33; 
-  } else if ( !strcmp( func, "q67" ) ) {
-    retval = filtQUANTILE_67; 
-  } else if ( !strcmp( func, "q75" ) ) {
-    retval = filtQUANTILE_75; 
-  } else if ( !strcmp( func, "qxx" ) ) {
-    retval = filtQUANTILE_XX; 
-  } else if ( !strcmp( func, "mcv" ) ) {
-    retval = filtMOST_COMMON; 
-  } else if ( !strcmp( func, "rclip" ) ) {
-    retval = filtRCLIP; 
-  } else if ( !strcmp( func, "peak" ) ) {
-    retval = filtPEAK; 
-  } else if ( !strcmp( func, "ridge" ) ) {
-    retval = filtRIDGE; 
-  } else if ( !strcmp( func, "valley" ) ) {
-    retval = filtVALLEY; 
-  } else if ( !strcmp( func, "plain" ) ) {
-    retval = filtPLAIN; 
-  } else if ( !strcmp( func, "olympic" ) ) {
-    retval = filtOLYMPIC; 
-  } else if ( !strcmp( func, "pmean" ) ) {
-    retval = filtPMEAN; 
-  } else if ( !strcmp( func, "mid" ) ) {
-    retval = filtMID; 
-  } else if ( !strcmp( func, "mu3" ) ) {
-    retval = filtMU3; 
-  } else if ( !strcmp( func, "mu4" ) ) {
-    retval = filtMU4; 
-  } else if ( !strcmp( func, "jitter" ) ) {
-    retval = filtJITTER; 
-  } else if ( !strcmp( func, "rms" ) ) {
-    retval = filtRMS; 
-  } else if ( !strcmp( func, "nslope" ) ) {
-    retval = filtMIN_SLOPE; 
-  } else if ( !strcmp( func, "3sigmean" ) ) {
-    retval = filt3SIGMA_MEAN; 
-  } else if ( !strcmp( func, "3sigmedian" ) ) {
-    retval = filt3SIGMA_MEDIAN; 
-  } else {
-    retval = filtUNKN;
-  }
-  
-  return(retval);
-
-}
-
 
 
 int dmimgfilter(void)
@@ -539,7 +449,6 @@ int dmimgfilter(void)
   long xx, yy;
 
   double *outdata = NULL;
-  Method mth;
   long nkvals;
   short **nullmask;
 
@@ -591,7 +500,7 @@ int dmimgfilter(void)
     return(-1);
   }
 
-  if ( filtUNKN == ( mth = get_method( func ) ) ) {
+  if ( NULL == ( nonlinear = get_method( func ) ) ) {
     err_msg("ERROR: function '%s' is not supported\n", func );
     return(-1);
   }
@@ -652,54 +561,7 @@ int dmimgfilter(void)
   } /* end while loop over stack */
 
 
-  
-  /* Use function points so that we don't have to go through the switch
-     statement for every pixel, also makes adding new f() easier.*/
-  switch( mth ) {
-  case filtCOUNT:       nonlinear = _filtCOUNT;       break;
-  case filtMIN:         nonlinear = _filtMIN;         break;
-  case filtMAX:         nonlinear = _filtMAX;         break;
-  case filtSUM:         nonlinear = _filtSUM;         break;
-  case filtEXTREME:     nonlinear = _filtEXTREME;     break;
-  case filtRANGE:       nonlinear = _filtRANGE;       break;
-  case filtRCLIP:       nonlinear = _filtRCLIP;       break;
-  case filtLOCEQ:       nonlinear = _filtLOCEQ;       break;
-  case filtMEAN:        nonlinear = _filtMEAN;        break;
-  case filtMEDIAN:      nonlinear = _filtMEDIAN;      break;
-  case filtMODE:        nonlinear = _filtMODE;        break;
-  case filtNORM_MODE:   nonlinear = _filtNORM_MODE;   break;
-  case filtSIG:         nonlinear = _filtSIG;         break;
-  case filtKUWAHARA:    nonlinear = _filtKUWAHARA;    break;
-  case filtUNSHARP:     nonlinear = _filtUNSHARP;     break;
-  case filtVARIANCE:    nonlinear = _filtVARIANCE;    break;
-  case filtQUANTILE_25: nonlinear = _filtQUANTILE_25; break;
-  case filtQUANTILE_33: nonlinear = _filtQUANTILE_33; break;
-  case filtQUANTILE_67: nonlinear = _filtQUANTILE_67; break;
-  case filtQUANTILE_75: nonlinear = _filtQUANTILE_75; break;
-  case filtQUANTILE_XX: nonlinear = _filtQUANTILE_XX; break;
-  case filtMOST_COMMON: nonlinear = _filtMOST_COMMON; break;
-  case filtPEAK:        nonlinear = _filtPEAK;        break;
-  case filtRIDGE:       nonlinear = _filtRIDGE;       break;
-  case filtVALLEY:      nonlinear = _filtVALLEY;      break;
-  case filtPLAIN:       nonlinear = _filtPLAIN;       break;
-  case filtOLYMPIC:     nonlinear = _filtOLYMPIC;     break;
-  case filtPMEAN:       nonlinear = _filtPMEAN;       break;
-  case filtMID:         nonlinear = _filtMID;         break;
-  case filtMU3:         nonlinear = _filtMU3;         break;
-  case filtMU4:         nonlinear = _filtMU4;         break;
-  case filtJITTER:      nonlinear = _filtJITTER;      break;
-  case filtRMS:         nonlinear = _filtRMS;         break;
-  case filtMIN_SLOPE:   nonlinear = _filtMIN_SLOPE;   break;
-  case filt3SIGMA_MEAN: nonlinear = _filt3SIGMA_MEAN; break;
-  case filt3SIGMA_MEDIAN: nonlinear = _filt3SIGMA_MEDIAN; break;
-  case filtUNKN:  /* fall thru intended */
-  default:
-    nonlinear = NULL;
-    break;
-  }
-
-
-  if ( filtPMEAN == mth  ) {
+  if ( _filtPMEAN == nonlinear  ) {
     for (ii=0;ii<nfiles;ii++) {
       if (( dt[ii] == dmFLOAT ) || (dt[ii] == dmDOUBLE)) {
         err_msg("WARNING: File #%ld is real valued but 'pmean'"
@@ -717,14 +579,14 @@ int dmimgfilter(void)
   nkvals = nkpix;
 
 
-  if ( mth == filtKUWAHARA ) {
+  if ( _filtKUWAHARA == nonlinear ) {
     for (xx=4;xx--;) {
       kuw_vals[xx] = (double*)calloc(nkvals*nfiles,sizeof(double));
     }
   }
 
 
-  if ( mth == filtMOST_COMMON ) {
+  if ( _filtMOST_COMMON == nonlinear ) {
     num_hist_bins =sqrt( nkvals )+0.5;
     histogram = (long*)calloc(num_hist_bins, sizeof(long));
   }
@@ -757,10 +619,7 @@ int dmimgfilter(void)
 
 
     for (xx=lAxes[0];xx--;) {
-      //long pix;      
-
       nvals = 0;
-      //pix = 0;
       kuw_num[0]=0; kuw_num[1] =0;kuw_num[2]=0;kuw_num[3]=0;
 
       /* Now loop over the number of files */
@@ -788,12 +647,10 @@ int dmimgfilter(void)
 
           
           if ( (ax<0) || (ax >= lAxes[0])) {
-            //pix--;
             continue;
           }
 
           if ( (ay<0) || (ay >= lAxes[1])) {
-            //pix--;
             continue;
           }
           /* If the kernel pixel is non-zero then add more data to
@@ -801,12 +658,11 @@ int dmimgfilter(void)
           dater = get_image_value( data[ii], dt[ii], ax, ay, lAxes, 
                                    nullmask[ii] );
           if ( ds_dNAN(dater) ) {
-            //pix--;
             continue;
           }
 
           
-          if ( mth == filtKUWAHARA ) {
+          if (_filtKUWAHARA == nonlinear) {
             long qx, qy;
             qx = kx[kk];
             qy = ky[kk];
@@ -824,7 +680,6 @@ int dmimgfilter(void)
           } 
           vals[nvals] = dater;
           nvals++;
-          //pix--;
 
           
         } /* end for kk */
@@ -838,16 +693,6 @@ int dmimgfilter(void)
         ds_MAKE_DNAN(nanval);
         outdata[outpix] = nanval;
       } else {
-
-/*
-          if (( xx==40) &&(yy==40)) {
-            printf(" nvals=%d\n",  nvals);                  
-          }
-
-          if (( xx==60) &&(yy==60)) {
-            printf(" nvals=%d\n",  nvals);                  
-          }
-*/
         outdata[outpix] = nonlinear( vals, nvals ); /* 'nonlinear' is function pointer */
       }
       outpix--;

@@ -8,7 +8,7 @@ binexe_PROGRAMS = $(tool)
 
 dmimgfilt_SOURCES = dmimgfilt.c t_dmimgfilt.c
 dmimgfilt_CPPFLAGS = $(CIAO_CFLAGS)
-dmimgfilt_LDADD = $(CIAO_LIBS) -ldmimgio -ldmfilters
+dmimgfilt_LDADD = $(CIAO_LIBS)
 dmimgfilt_LINK = $(CXX) -o $@ -Wl,-rpath,$(prefix)/lib -Wl,-rpath,$(prefix)/ots/lib 
 
 # problems with libstdc++ and cxcparam on Linux :(

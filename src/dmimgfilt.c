@@ -1,5 +1,5 @@
 /*                                                                
-**  Copyright (C) 2004-2008,2011  Smithsonian Astrophysical Observatory 
+**  Copyright (C) 2004-2008,2011,2021  Smithsonian Astrophysical Observatory 
 */                                                                
 
 /*                                                                          */
@@ -26,14 +26,7 @@
 #include <float.h>
 #include <cxcregion.h>
 #include <dmimgfilt.h>
-
-//~ typedef enum { 
-
-int dmimgfilter(void);
-
-
-long evaluate_kernel( char *kernel, double **kx, double **ky );
-
+#include <time.h>
 
 
 
@@ -78,37 +71,6 @@ Image* load_infile(char *infile)
 }
 
 
-/*
- *  Convert coordinates from C-index to Physical coordinates
- */
-int convert_coords( Image *image, double x_in, double y_in, double *x_out, double *y_out)
-{
-    if (image->xdesc == NULL) {
-        *x_out = x_in;
-        *y_out = y_in;
-        return(0);
-    }
-
-    double logical[2];
-    double physical[2];
-
-    // Convert from 0-based array index to physical coords
-    logical[0] = x_in + 1;
-    logical[1] = y_in + 1;
-    dmCoordCalc_d(image->xdesc, logical, physical);
-    if (image->ydesc){
-        dmCoordCalc_d(image->ydesc, logical+1, physical+1);
-    }
-    *x_out = physical[0];
-    *y_out = physical[1];
-
-    return(0);
-}
-
-
-
-
-
 long evaluate_kernel( char *kernel, double **kx, double **ky )
 {
   regRegion *reg;
@@ -134,7 +96,7 @@ long evaluate_kernel( char *kernel, double **kx, double **ky )
     * coordinates and not currently compatible. Remove this when a region 
     * library method is created to set coordinate system. 
     */
-    if ( NULL != ( strstr( kernel, "mask" ))){
+    if ( NULL != ( strstr( kernel, "mask(" ))){
       err_msg("ERROR: mask syntax, '%s', not compatible with dmimgfilt.  ", kernel);
       return(-1);
     }
@@ -174,7 +136,6 @@ int dmimgfilter(void)
   dmBlock *outBlock = NULL;
   dmDescriptor *outDesc = NULL;
 
-  long nkpix;
   double *kx, *ky;
 
 
@@ -204,6 +165,7 @@ int dmimgfilter(void)
   char lookup[DS_SZ_PATHNAME];
   short clobber;
   short verbose;
+  long seed;
 
   clgetstr( "infile", infile, DS_SZ_PATHNAME );
   clgetstr( "outfile", outfile, DS_SZ_PATHNAME );
@@ -211,11 +173,17 @@ int dmimgfilter(void)
   clgetstr( "mask", mask, DS_SZ_FNAME );
   niter = clgeti( "numiter" );
   clgetstr( "lookupTab", lookup, DS_SZ_PATHNAME );
-  clobber = clgetb( "clobber" );
+  seed = clgeti("randseed");  
   verbose = clgeti( "verbose" );
+  clobber = clgetb( "clobber" );
 
+  if ( 0 == seed) {
+      srand48(time(NULL));
+  } else {
+      srand48(seed);
+  }
 
-
+  /* Setup input stack */
   Stack instack;
   char *stkfile;
   long nfiles;
@@ -229,15 +197,7 @@ int dmimgfilter(void)
 
   nfiles = stk_count(instack);
 
-
-
-  //~ dt = (dmDataType*)calloc(nfiles,sizeof(dmDataType));
-  //~ nullmask = ( short**)calloc(nfiles,sizeof(short*));
-  //~ data = ( void**)calloc(nfiles,sizeof(void*));
-  //~ hdr = (Header_Type**)calloc( nfiles, sizeof(Header_Type*));
-
-
-
+  /* Load input images */
   Image **images = (Image**)calloc(nfiles,sizeof(Image*));
   if ( NULL == images) {
       err_msg("ERROR: problem allocing memory");
@@ -255,7 +215,7 @@ int dmimgfilter(void)
     }
     images[ii]=in_image;
     
-    if ( ii == 0 ) { // First image 
+    if ( ii == 0 ) { // First image, create output image
 
       if ( ds_clobber( outfile, clobber, NULL ) != 0 ) {
         return(-1);
@@ -276,7 +236,7 @@ int dmimgfilter(void)
       dmBlockCopyWCS( in_image->block, outBlock);
       
     } else {
-      /* check */
+      /* check , make sure next image is compatible with 1st*/
       if ( ( images[0]->lAxes[0] != in_image->lAxes[0] ) ||
            ( images[0]->lAxes[1] != in_image->lAxes[1] )    ) {
         err_msg("ERROR: All images must be the same size\n");
@@ -288,6 +248,8 @@ int dmimgfilter(void)
     dmImageClose( in_image->block );
   } /* end while loop over stack */
 
+
+  /* Merge headers if lookupTab is not-none */
   stk_rewind(instack);
   nfiles = stk_count(instack); /* Re-count since while (niter) loop */
   if (( strlen(lookup) > 0 ) && 
@@ -307,18 +269,20 @@ int dmimgfilter(void)
     putHdr( outBlock, hdrDM_FILE, mergehdr, ALL_STS, "dmimgfilt");
     free(all_headers);
   }
+
+  /* Add history to output */
   put_param_hist_info( outBlock, "dmimgfilt", NULL, 0 );
 
 
+  /* Setup the mask and the filter function */
 
 
-
-  if ( -1 == ( nkpix = evaluate_kernel( mask, &kx, &ky ) ) ) {
+  if ( -1 == ( nkvals = evaluate_kernel( mask, &kx, &ky ) ) ) {
     err_msg("ERROR: cannot parse mask function '%s'\n", mask );
     return(-1);
   }
 
-  if ( 0 == nkpix ) {
+  if ( 0 == nkvals ) {
     err_msg("ERROR: mask has no pixels in it\n");
     return(-1);
   }
@@ -329,6 +293,11 @@ int dmimgfilter(void)
   }
 
 
+  /* Special cases for various filters */
+
+  minpixel = 0;       // From dmfilters 
+  maxpixel = 255;     // From dmfilters
+  pixelrange = 256;   // From dmfilters
 
   if ( _filtPMEAN == nonlinear  ) {
     for (ii=0;ii<nfiles;ii++) {
@@ -340,20 +309,11 @@ int dmimgfilter(void)
     }
   }
 
-  minpixel = 0;
-  maxpixel = 255;
-  pixelrange = 256;
-
-
-  nkvals = nkpix;
-
-
   if ( _filtKUWAHARA == nonlinear ) {
     for (xx=4;xx--;) {
       kuw_vals[xx] = (double*)calloc(nkvals*nfiles,sizeof(double));
     }
   }
-
 
   if ( _filtMOST_COMMON == nonlinear ) {
     num_hist_bins =sqrt( nkvals )+0.5;
@@ -361,7 +321,7 @@ int dmimgfilter(void)
   }
 
 
-
+  // Setup buffer for stats value 
   vals = (double*)calloc(nkvals*nfiles, sizeof(double));
 
 
@@ -411,11 +371,8 @@ int dmimgfilter(void)
           long ay;
           long ax;
 
-          ax=xx+kx[kk];
+          ax=xx+kx[kk];  // kx,ky are offsets from center of mask
           ay=yy+ky[kk];
-
-          
-
           
           if ( (ax<0) || (ax >= images[ii]->lAxes[0])) {
             continue;
@@ -424,7 +381,7 @@ int dmimgfilter(void)
           if ( (ay<0) || (ay >= images[ii]->lAxes[1])) {
             continue;
           }
-          /* If the kernel pixel is non-zero then add more data to
+          /* If the kernel pixel is finite then add more data to
              the array */
           dater = get_image_value( images[ii]->data, images[ii]->dt, 
                                      ax, ay, 

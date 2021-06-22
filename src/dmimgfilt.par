@@ -4,6 +4,7 @@ function,s,a,"mean",min|max|mean|median|mode|mid|sigma|extreme|locheq|kuwahara|u
 mask,s,a,"",,,"masking filter"
 numiter,i,h,1,1,,"Number of iterations to loop over"
 lookupTab,f,h,"${ASCDS_CALIB}/dmmerge_header_lookup.txt",,,"lookup table"
+randseed,i,h,0,0,65535,"Seed for random seed generator"
 verbose,i,h,0,0,5,"Tool verbosity"
 clobber,b,h,no,,,"Clobber existing output?"
 mode,s,h,"ql",,,

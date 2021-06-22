@@ -62,7 +62,7 @@
 H***************************************************************** */
 
 #include "dslib.h"
-
+#include "dmimgfilt.h"
 
 int main(int argc, char** argv)
 {

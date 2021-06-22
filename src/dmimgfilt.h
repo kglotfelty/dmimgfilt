@@ -34,5 +34,6 @@ typedef struct {
     Header_Type *hdr;   // Header keywords
 } Image;
 
-Image* load_infile(char *infile);
-int convert_coords( Image *image, double x_in, double y_in, double *x_out, double *y_out);
+extern Image* load_infile(char *infile);
+extern int dmimgfilter(void);
+extern long evaluate_kernel( char *kernel, double **kx, double **ky );

@@ -7,7 +7,6 @@ lookupTab,f,h,"${ASCDS_CALIB}/dmmerge_header_lookup.txt",,,"lookup table"
 randseed,i,h,0,0,65535,"Seed for random seed generator"
 verbose,i,h,0,0,5,"Tool verbosity"
 clobber,b,h,no,,,"Clobber existing output?"
-mode,s,h,"ql",,,
 #
 # Some simple functions
 #
@@ -23,3 +22,4 @@ annulus7_3,s,h,"annulus(0,0,3,7)",,,"Annulus: o=7,i=3"
 bann5_3,s,h,"box(0,0,5,5)-box(0,0,3,3)",,,"Box Annulus: o=5,i=3"
 bann7_3,s,h,"box(0,0,7,7)-box(0,0,3,3)",,,"Box Annulus: o=7,i=3"
 bann7_5,s,h,"box(0,0,7,7)-box(0,0,5,5)",,,"Box Annulus: o=7,i=5"
+mode,s,h,"ql",,,

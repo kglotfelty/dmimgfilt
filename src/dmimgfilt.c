@@ -177,11 +177,6 @@ int dmimgfilter(void)
   verbose = clgeti( "verbose" );
   clobber = clgetb( "clobber" );
 
-  if ( 0 == seed) {
-      srand48(time(NULL));
-  } else {
-      srand48(seed);
-  }
 
   /* Setup input stack */
   Stack instack;
@@ -318,6 +313,14 @@ int dmimgfilter(void)
   if ( _filtMOST_COMMON == nonlinear ) {
     num_hist_bins =sqrt( nkvals )+0.5;
     histogram = (long*)calloc(num_hist_bins, sizeof(long));
+  }
+
+  if (_filtJITTER == nonlinear) {
+      if ( 0 == seed) {
+          srand48(time(NULL));
+      } else {
+          srand48(seed);
+      }      
   }
 
 

@@ -1,6 +1,6 @@
 infile,f,a,"",,,"Input image file name"
 outfile,f,a,"",,,"Output file name"
-function,s,a,"mean",min|max|mean|median|mode|mid|sigma|extreme|locheq|kuwahara|unsharp|range|variance|nmode|q25|q33|q67|q75|qxx|mcv|sum|rclip|peak|ridge|valley|plain|count|olympic|pmean|mu3|mu4|jitter|rms|nslope|3sigmean|3sigmedian,,"Filter function"
+function,s,a,"mean",min|max|mean|median|mode|mid|sigma|extreme|locheq|kuwahara|unsharp|range|variance|nmode|q10|q25|q33|q67|q75|q90|qxx|mcv|sum|rclip|peak|ridge|valley|plain|count|olympic|pmean|mu3|mu4|jitter|rms|nslope|3sigmean|3sigmedian,,"Filter function"
 mask,s,a,"",,,"masking filter"
 numiter,i,h,1,1,,"Number of iterations to loop over"
 lookupTab,f,h,"${ASCDS_CALIB}/dmmerge_header_lookup.txt",,,"lookup table"

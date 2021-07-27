@@ -1,4 +1,5 @@
-AC_INIT([dmimgfilt], [4.13.0], [glotfeltyk@si.edu])
+AC_INIT([dmimgfilt], [4.13.5], [glotfeltyk@si.edu])
+AM_MAINTAINER_MODE([disable])
 AM_INIT_AUTOMAKE([foreign -Wall])
 AC_PROG_CC
 AM_PROG_CC_C_O

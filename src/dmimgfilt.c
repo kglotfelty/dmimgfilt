@@ -316,9 +316,7 @@ int dmimgfilter(void)
 
       /* Now loop over the number of files */
       for (ii=nfiles;ii--; ) {
-        centerval = get_image_value( images[ii]->data, images[ii]->dt, 
-                                     xx, yy, 
-                                     images[ii]->lAxes, images[ii]->mask );
+        centerval = get_image_value( images[ii], xx, yy );
 
         if ( ds_dNAN( centerval ) ) {
           continue;
@@ -346,9 +344,7 @@ int dmimgfilter(void)
           }
           /* If the kernel pixel is finite then add more data to
              the array */
-          dater = get_image_value( images[ii]->data, images[ii]->dt, 
-                                     ax, ay, 
-                                     images[ii]->lAxes, images[ii]->mask );
+          dater = get_image_value( images[ii], ax, ay);
           if ( ds_dNAN(dater) ) {
             continue;
           }

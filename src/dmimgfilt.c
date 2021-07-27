@@ -31,46 +31,6 @@
 
 
 
-/*
- *  Load images using dmimgio routines
- */
-Image* load_infile(char *infile)
-{
-    // Load image
-
-    Image *image;
-    if (NULL == (image = calloc(1,sizeof(Image)))) {
-        err_msg("ERROR: Cannot allocate memory for image\n");
-        return(NULL);
-    }
-
-    if (NULL == (image->block = dmImageOpen(infile))) {
-        err_msg("ERROR: Cannot load infile '%s'\n",infile);
-        return(NULL);
-    }
-
-    // dmimgio
-    regRegion *dss = NULL;
-    long null_value;
-    short has_null;
-    image->dt = get_image_data(image->block, &(image->data),
-                    &(image->lAxes), &dss, &null_value, &has_null);
-    get_image_wcs(image->block, &(image->xdesc), &(image->ydesc));
-    image->mask = get_image_mask(image->block, image->data,
-                    image->dt, image->lAxes, dss, null_value,
-                    has_null, image->xdesc, image->ydesc);
-
-    if (dss != NULL){
-        regFree(dss);
-        dss=NULL;
-    }
-
-    image->hdr = getHdr(image->block, hdrDM_FILE);
-
-    return(image);
-}
-
-
 long evaluate_kernel( char *kernel, double **kx, double **ky )
 {
   regRegion *reg;
@@ -205,7 +165,7 @@ int dmimgfilter(void)
   while ( NULL != (stkfile=stk_read_next(instack)) ) {
 
     Image *in_image;
-    if ( NULL == (in_image = load_infile( stkfile ))) {
+    if ( NULL == (in_image = load_image( stkfile ))) {
         return(-1);
     }
     images[ii]=in_image;

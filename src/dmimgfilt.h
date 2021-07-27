@@ -20,20 +20,6 @@
 
 #include "dmfilters.h"
 #include "dmimgio.h"
-#include "hdrlib2.h"
 
-/* Hold info for an input image */
-typedef struct {
-    void *data;        // pixel values
-    dmDataType dt;     // pixel datatype
-    long *lAxes;       // axis lenghts
-    short *mask;        // mask of valid pixels
-    dmDescriptor *xdesc;  // X (or sky) coordinate descriptor
-    dmDescriptor *ydesc;  // Y coordinate descriptor
-    dmBlock *block; // The block image came from
-    Header_Type *hdr;   // Header keywords
-} Image;
-
-extern Image* load_infile(char *infile);
 extern int dmimgfilter(void);
 extern long evaluate_kernel( char *kernel, double **kx, double **ky );
